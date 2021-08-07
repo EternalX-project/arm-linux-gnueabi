@@ -1,0 +1,47 @@
+kind: pipeline
+name: GNU GCC ARM32 BUILD
+
+clone:
+  disable: true
+
+platform:
+  arch: arm64
+
+steps:
+- name: BUILDING GCC
+  image: ubuntu:20.04
+  environment:
+      DEBIAN_FRONTEND: noninteractive
+      GITHUB_TOKEN:
+        from_secret: GITHUB_TOKEN
+      TARGET: arm
+      GCC_VERSION: 9
+      GIT_REPO: EternalX-project/arm-linux-gnueabi
+      GIT_BRANCH: arm64
+      GIT_COMMIT_MESSAGE: "Update GCC 9 from CI build"
+  commands:
+    # Setup Docker
+    - apt-get update
+    - apt-get install -yq software-properties-common lsb-release apt-transport-https ca-certificates curl software-properties-common
+    - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
+    - add-apt-repository "deb [arch=arm64] https://download.docker.com/linux/ubuntu  $(lsb_release -cs)  stable"
+    - apt-get install -yq docker-ce
+
+    # Installing Dependencies
+    - apt-get update
+    - apt-get -y upgrade
+    - apt-get -y install flex bison ncurses-dev texinfo gcc gperf patch libtool automake g++ libncurses5-dev gawk expat libexpat1-dev python-all-dev binutils-dev bc libcap-dev autoconf autoconf-archive libgmp-dev build-essential gcc-multilib g++-multilib pkg-config libmpc-dev libmpfr-dev autopoint gettext liblzma-dev libssl-dev libz-dev rsync wget
+    
+    # Building GCC
+    - git clone https://github.com/EternalX-project/build-tools-gcc.git builder && cd builder
+    - bash build -a $TARGET -s gnu -v $GCC_VERSION -V -p gz glibc
+
+    # Push GCC To Github
+    - git clone "https://$GITHUB_TOKEN@github.com/$GIT_REPO" upstream -b $GIT_BRANCH
+    - cd upstream
+    - rm -rf *
+    - cp -r ../arm-linux-gnueabi/* .
+    - git add .
+    - git commit -am "$GIT_COMMIT_MESSAGE"
+    - git push origin $GIT_BRANCH
+
