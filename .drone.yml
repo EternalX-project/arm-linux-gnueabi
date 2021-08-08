@@ -16,6 +16,8 @@ steps:
         from_secret: GITHUB_TOKEN
       TARGET: arm
       GCC_VERSION: 9
+      GIT_REPO: EternalX-project/arm-linux-gnueabi
+      GIT_BRANCH: amd64
       COMMIT_MESSAGE: "Update GCC 9 from CI build"
   commands:
     # Setup Docker
@@ -35,11 +37,11 @@ steps:
     - bash build -a $TARGET -s gnu -v $GCC_VERSION -V -p gz glibc
 
     # Push GCC To Github
-    - git clone "https://$GITHUB_TOKEN@github.com/EternalX-project/x86_64-arm-linux-gnueabi" upstream -b $GCC_VERSION
+    - git clone "https://$GITHUB_TOKEN@github.com/$GIT_REPO" upstream -b $GIT_BRANCH
     - cd upstream
     - rm -rf *
     - cp -r ../arm-linux-gnueabi/* .
     - git add .
-    - git commit -am "$COMMIT_MESSAGE"
-    - git push
+    - git commit -am "$GIT_COMMIT_MESSAGE"
+    - git push origin $GIT_BRANCH
 
