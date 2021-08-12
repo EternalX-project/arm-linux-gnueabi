@@ -15,10 +15,10 @@ steps:
       GITHUB_TOKEN:
         from_secret: GITHUB_TOKEN
       TARGET: arm
-      GCC_VERSION: 9
+      GCC_VERSION: 10
       GIT_REPO: EternalX-project/arm-linux-gnueabi
       GIT_BRANCH: amd64
-      COMMIT_MESSAGE: "Update GCC 9 from CI build"
+      GIT_COMMIT_MESSAGE: "Update GCC 10 from CI build"
   commands:
     # Setup Docker
     - apt-get update
